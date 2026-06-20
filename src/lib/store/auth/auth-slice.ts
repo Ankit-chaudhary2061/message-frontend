@@ -127,3 +127,43 @@ export function resendPhoneOtp(data: SendOtpPayload) {
     }
   };
 }
+
+
+export function checkAuth() {
+  return async function checkAuthThunk(dispatch: AppDispatch) {
+    try {
+      dispatch(setLoginStatus(Status.LOADING));
+
+      const response = await api.get("/check-auth");
+
+      dispatch(setUser(response.data.user));
+      dispatch(setLoginStatus(Status.SUCCESS));
+
+      return response.data;
+    } catch (error: any) {
+      dispatch(setUser(null));
+      dispatch(setLoginStatus(Status.ERROR));
+
+      throw error.response?.data || error;
+    }
+  };
+}
+
+export function logOut() {
+  return async function logOutThunk(dispatch: AppDispatch) {
+    try {
+      dispatch(setLoginStatus(Status.LOADING));
+
+      const response = await api.post("/logout");
+
+      dispatch(setUser(null));
+      dispatch(setLoginStatus(Status.SUCCESS));
+
+      return response.data;
+    } catch (error: any) {
+      dispatch(setLoginStatus(Status.ERROR));
+      throw error.response?.data || error;
+    }
+  };
+}
+

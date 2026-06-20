@@ -23,6 +23,7 @@ export interface IUser {
   isOnline: boolean;
   isVerified: boolean;
   agreed: boolean;
+  isAuthenticated: boolean;
 
   createdAt: Date;
   updatedAt: Date;

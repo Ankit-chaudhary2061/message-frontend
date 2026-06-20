@@ -14,6 +14,16 @@ const UpdateProfile = () => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state: RootState) => state.theme.theme);
   const profileStatus = useAppSelector((state: RootState) => state.auth.profileStatus);
+const avatars = [
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Jack",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Emma",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Alex",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Sophia",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Noah",
+  "https://api.dicebear.com/9.x/adventurer/svg?seed=Olivia",
+];
+
+
 
   const [data, setData] = useState<UpdateProfileData>({
     username: "",
@@ -21,7 +31,7 @@ const UpdateProfile = () => {
     agreed: false,
     profileImage: null,
   });
-
+const [avatar,setAvatar] = useState(avatars[0])
 const handleChange = (
   e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 ) => {

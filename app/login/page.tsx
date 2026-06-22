@@ -81,19 +81,15 @@ const Login = () => {
   }, [searchTerm]);
 
   /* ---------------- SUBMIT STATE ---------------- */
-  const isSubmitDisabled =
-    loginStatus === Status.LOADING ||
-    (mode === "phone"
-      ? phoneNumber.trim() === ""
-      : email.trim() === "");
+ const isSubmitDisabled =
+  loginStatus === Status.LOADING ||
+  !(mode === "phone" ? phoneNumber.trim() : email.trim());
 
   /* ---------------- BUILD IDENTIFIER (IMPORTANT FIX) ---------------- */
-  const getIdentifier = () => {
-    return mode === "phone"
-      ? `${selectedCountry.dialCode}${phoneNumber.trim()}`
-      : email.trim();
-  };
-
+ const identifier =
+  mode === "phone"
+    ? `${selectedCountry.dialCode}${phoneNumber.trim()}`
+    : email.trim();
   /* ---------------- STATUS HANDLER ---------------- */
   useEffect(() => {
     if (loginStatus === Status.ERROR) {
@@ -110,7 +106,7 @@ const Login = () => {
     if (loginStatus === Status.SUCCESS) {
       toast.success("Otp send  successful. Please verify OTP.");
 
-      const identifier = getIdentifier();
+    
 
       router.push(
         `/otp-verification?value=${encodeURIComponent(identifier)}`
@@ -119,17 +115,43 @@ const Login = () => {
   }, [loginStatus, mode, phoneNumber, email, selectedCountry]);
 
   /* ---------------- SUBMIT HANDLER ---------------- */
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
+  if (loginStatus === Status.LOADING) {
+    toast.info("Request already in progress");
+    return;
+  }
+
+  toast.info("Sending OTP...");
+
+  try {
     await dispatch(
       loginUser({
-        phoneNumber: mode === "phone" ? phoneNumber.trim() : undefined,
-        phoneSuffix: mode === "phone" ? selectedCountry.dialCode : undefined,
-        email: mode === "email" ? email.trim() : undefined,
+        phoneNumber:
+          mode === "phone"
+            ? phoneNumber.trim()
+            : undefined,
+
+        phoneSuffix:
+          mode === "phone"
+            ? selectedCountry.dialCode
+            : undefined,
+
+        email:
+          mode === "email"
+            ? email.trim()
+            : undefined,
       })
     );
-  };
+  } catch (error: any) {
+    console.error(error);
+    const message =
+      (error && (error.message || error?.error || error?.message?.toString())) ||
+      "Failed to send OTP";
+    toast.error(typeof message === "string" ? message : "Failed to send OTP");
+  }
+};
 
   /* ---------------- UI ---------------- */
   return (
@@ -222,7 +244,11 @@ const Login = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search country..."
-                    className="w-full p-3 border-b outline-none text-sm"
+                   className={`w-full px-2 py-1 border ${
+  theme === "dark"
+    ? "bg-gray-600 border-gray-500 text-white"
+    : "bg-white border-gray-300"
+} rounded-md text-sm focus:ring-2 focus:ring-green-500`}
                   />
 
                   {filteredCountries.map((country) => (
@@ -234,7 +260,11 @@ const Login = () => {
                         setShowDropDown(false);
                         setSearchTerm("");
                       }}
-                      className="w-full flex justify-between px-3 py-2 hover:bg-gray-100"
+                      className={`w-full px-3 py-2 text-left transition ${
+  theme === "dark"
+    ? "hover:bg-gray-700"
+    : "hover:bg-gray-100"
+}`}
                     >
                       <span className="flex items-center gap-2">
                         <span>{country.flag}</span>

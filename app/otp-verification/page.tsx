@@ -1,10 +1,13 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   resendOtp,
+  resendPhoneOtp,
   verifyOtp,
 } from "@/src/lib/store/auth/auth-slice";
 import { useAppDispatch, useAppSelector } from "@/src/lib/store/hook";
+import { RootState } from "@/src/lib/store/store";
 import { Status } from "@/src/lib/types/global-types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
@@ -15,11 +18,14 @@ const OTPVerification = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const email = searchParams.get("email") ?? "";
-  const phone = searchParams.get("phone") ?? "";
+  const value = searchParams.get("value") ?? "";
+  const isEmail = value.includes("@");
+  const email = isEmail ? value : "";
+  const phone = !isEmail ? value : ""; 
 
   const dispatch = useAppDispatch();
-  const { otpStatus } = useAppSelector((state) => state.auth);
+  const theme = useAppSelector((state: RootState) => state.theme.theme);
+  const { otpStatus, user } = useAppSelector((state) => state.auth);
 
   /* ---------------- STATE ---------------- */
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
@@ -69,34 +75,47 @@ const OTPVerification = () => {
 
     dispatch(
       verifyOtp({
-        otp: code,
-        email: email || undefined,
-        phoneNumber: phone || undefined,
+        emailOtp: isEmail ? code : undefined,
+        email: isEmail ? email : undefined,
+        otp: !isEmail ? code : undefined,
+        phoneNumber: !isEmail ? phone : undefined,
       })
     );
   };
 
   /* ---------------- STATUS HANDLING ---------------- */
-  useEffect(() => {
-    if (otpStatus === Status.SUCCESS) {
-      toast.success("OTP verified successfully! weelcome back to wwhats app");
-      router.push("/login");
-    }
+useEffect(() => {
+  if (otpStatus === Status.SUCCESS && user) {
+    toast.success("OTP verified successfully!");
 
-    if (otpStatus === Status.ERROR) {
-      toast.error("Invalid OTP");
+    const profileCompleted =
+      user.username?.trim() &&
+      user.profileImage?.url;
+
+    if (profileCompleted) {
+      router.push("/");
+    } else {
+      router.push("/update-profile");
     }
-  }, [otpStatus, router]);
+  }
+
+  if (otpStatus === Status.ERROR) {
+    toast.error("Invalid OTP");
+  }
+}, [otpStatus, user, router]);
 
   /* ---------------- RESEND OTP ---------------- */
   const handleResendOtp = () => {
     if (!email && !phone) {
       toast.error("Missing email/phone");
       return;
-    } 
+    }
 
-    if (email) dispatch(resendOtp(email));
-    else dispatch(resendOtp(phone)); // if you add phone version later
+    if (email) {
+      dispatch(resendOtp(email));
+    } else {
+      dispatch(resendPhoneOtp({ phoneNumber: phone }));
+    }
 
     setOtp(Array(6).fill(""));
     setTimer(60);
@@ -104,8 +123,22 @@ const OTPVerification = () => {
 
   /* ---------------- UI ---------------- */
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-[#ecf7ed] p-4">
-      <div className="w-full max-w-md p-8 text-center bg-white rounded-[2rem] shadow-2xl border border-[#326E3B]/10">
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 ${
+        theme === "dark"
+          ? "bg-gray-900"
+          : "bg-gradient-to-br from-green-400 to-blue-500"
+      }`}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`w-full max-w-md p-8 text-center rounded-[2rem] shadow-2xl border border-[#326E3B]/10 ${
+          theme === "dark"
+            ? "bg-gray-800 text-white border-green-700"
+            : "bg-white text-gray-800"
+        }`}
+      >
 
         {/* ICON */}
         <MessageCircle className="w-12 h-12 mx-auto text-[#326E3B] mb-4" />
@@ -178,7 +211,7 @@ const OTPVerification = () => {
             </button>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

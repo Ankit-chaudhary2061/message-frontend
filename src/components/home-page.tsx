@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 
@@ -34,7 +36,7 @@ const HomePage = () => {
         transition={{ duration: 0.5 }}
         className="h-full"
       >
-        <ChatList />
+        <ChatList contacts={users} selectedContactId={selectedContactId} />
 
         
       </motion.div>

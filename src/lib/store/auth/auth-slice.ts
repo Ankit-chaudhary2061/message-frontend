@@ -200,7 +200,10 @@ export function getAllUsers() {
 
       const response = await api.get("/auth/users");
 
-      dispatch(setUsers(response.data.users));
+      console.log(response.data);
+
+      dispatch(setUsers(response.data.data));
+
       dispatch(setUsersStatus(Status.SUCCESS));
 
       return response.data;

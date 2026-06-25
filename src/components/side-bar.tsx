@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -9,7 +10,7 @@ import {
 } from "../lib/store/hook";
 
 import { setActiveTab } from "../lib/store/layout/ui-slice";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaUserCircle, FaWhatsapp ,FaCog} from "react-icons/fa";
 import { MdRadioButtonChecked } from "react-icons/md";
 import { motion } from "framer-motion";
 
@@ -101,13 +102,35 @@ const SideBarContent = (
       href="/user-profile"
       className={`${!isMobile ? "mb-8" : ""}
       ${
-        activeTab === "status"
+        activeTab === "profile"
           ? "bg-gray-300 shadow-sm p-2 rounded-full"
           : ""
       }
       focus:outline-none`}
     >
-      <MdRadioButtonChecked className={`h-6 w-6 ${iconClass}`} />
+      {user?.profileImage?.url ? (
+        <Image
+          src={user.profileImage.url}
+          alt="Profile"
+          width={40}
+          height={40}
+          className="rounded-full object-cover"
+        />
+      ) : (
+        <FaUserCircle className={`h-6 w-6 ${iconClass}`} />
+      )}
+    </Link> 
+    <Link
+      href="/setting"
+      className={`${!isMobile ? "mb-8" : ""}
+      ${
+        activeTab === "setting"
+          ? "bg-gray-300 shadow-sm p-2 rounded-full"
+          : ""
+      }
+      focus:outline-none`}
+    >
+      <FaCog className={`h-6 w-6 ${iconClass}`} />
     </Link>
 
   </>

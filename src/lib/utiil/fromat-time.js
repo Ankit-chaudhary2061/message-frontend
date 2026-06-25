@@ -1,4 +1,4 @@
-export default function formatTimestamp(timestamp) {
+ function formatTimestamp(timestamp) {
   const now = Date.now();
   const messageTime = new Date(timestamp).getTime();
 
@@ -27,3 +27,6 @@ export default function formatTimestamp(timestamp) {
 
   return new Date(timestamp).toLocaleDateString();
 }
+
+
+export default  formatTimestamp;

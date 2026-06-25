@@ -30,8 +30,9 @@ export interface IUser {
 }
 export interface IAuthState {
   user: IUser | null;
-
+  users: IUser[];
   loginStatus: Status;
+  usersStatus: Status;
   otpStatus: Status;
   profileStatus: Status;
 }

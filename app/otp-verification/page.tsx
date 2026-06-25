@@ -18,10 +18,11 @@ const OTPVerification = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const value = searchParams.get("value") ?? "";
-  const isEmail = value.includes("@");
-  const email = isEmail ? value : "";
-  const phone = !isEmail ? value : ""; 
+ const email = searchParams.get("email") ?? "";
+const phone = searchParams.get("phone") ?? "";
+const suffix = searchParams.get("suffix") ?? "";
+
+const isEmail = !!email;
 
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state: RootState) => state.theme.theme);
@@ -73,14 +74,16 @@ const OTPVerification = () => {
       return;
     }
 
-    dispatch(
-      verifyOtp({
-        emailOtp: isEmail ? code : undefined,
-        email: isEmail ? email : undefined,
-        otp: !isEmail ? code : undefined,
-        phoneNumber: !isEmail ? phone : undefined,
-      })
-    );
+   dispatch(
+  verifyOtp({
+    emailOtp: isEmail ? code : undefined,
+    email: isEmail ? email : undefined,
+
+    otp: !isEmail ? code : undefined,
+    phoneNumber: !isEmail ? phone : undefined,
+    phoneSuffix: !isEmail ? suffix : undefined,
+  })
+);
   };
 
   /* ---------------- STATUS HANDLING ---------------- */
@@ -93,7 +96,7 @@ useEffect(() => {
       user.profileImage?.url;
 
     if (profileCompleted) {
-      router.push("/");
+      router.push("/home");
     } else {
       router.push("/update-profile");
     }
@@ -114,7 +117,12 @@ useEffect(() => {
     if (email) {
       dispatch(resendOtp(email));
     } else {
-      dispatch(resendPhoneOtp({ phoneNumber: phone }));
+     dispatch(
+  resendPhoneOtp({
+    phoneNumber: phone,
+    phoneSuffix: suffix,
+  })
+);
     }
 
     setOtp(Array(6).fill(""));

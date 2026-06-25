@@ -103,15 +103,21 @@ const Login = () => {
       return () => clearTimeout(timeout);
     }
 
-    if (loginStatus === Status.SUCCESS) {
-      toast.success("Otp send  successful. Please verify OTP.");
+   if (loginStatus === Status.SUCCESS) {
+  toast.success("OTP sent successfully. Please verify OTP.");
 
-    
-
-      router.push(
-        `/otp-verification?value=${encodeURIComponent(identifier)}`
-      );
-    }
+  if (mode === "phone") {
+    router.push(
+      `/otp-verification?phone=${encodeURIComponent(
+        phoneNumber.trim()
+      )}&suffix=${encodeURIComponent(selectedCountry.dialCode)}`
+    );
+  } else {
+    router.push(
+      `/otp-verification?email=${encodeURIComponent(email.trim())}`
+    );
+  }
+}
   }, [loginStatus, mode, phoneNumber, email, selectedCountry]);
 
   /* ---------------- SUBMIT HANDLER ---------------- */

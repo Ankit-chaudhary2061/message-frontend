@@ -64,28 +64,30 @@ const handleImageChange = (
   }));
 };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    try {
-      const formData = new FormData();
+  try {
+    const formData = new FormData();
 
-      formData.append("username", data.username);
-      formData.append("about", data.about);
-      formData.append("agreed", String(data.agreed));
+    formData.append("username", data.username);
+    formData.append("about", data.about);
+    formData.append("agreed", String(data.agreed));
 
-      if (data.profileImage) {
-        formData.append("profileImage", data.profileImage);
-      }else{
-        formData.append("avatar", avatar);
-      }
-
-      await dispatch(updateProfile(formData));
-      router.push("/profile");
-    } catch (error) {
-      console.error(error);
+    // IMPORTANT FIX
+    if (data.profileImage) {
+      formData.append("profileImage", data.profileImage);
+    } else {
+      formData.append("avatar", avatar);
     }
-  };
+
+    await dispatch(updateProfile(formData));
+
+    router.push("/profile");
+  } catch (error) {
+    console.error("UPDATE PROFILE ERROR:", error);
+  }
+};
 
   return (
     <div

@@ -25,7 +25,7 @@ export const SideBar = () => {
   const { user } = useAppSelector(
     (state) => state.auth
   );
-
+console.log(user)
   const { activeTab, selectedContactId } =
     useAppSelector((state) => state.layout);
 
@@ -98,28 +98,30 @@ const SideBarContent = (
     </Link>
 
     {!isMobile && <div className="grow" />}
-    <Link
-      href="/user-profile"
-      className={`${!isMobile ? "mb-8" : ""}
-      ${
-        activeTab === "profile"
-          ? "bg-gray-300 shadow-sm p-2 rounded-full"
-          : ""
-      }
-      focus:outline-none`}
-    >
-      {user?.profileImage?.url ? (
-        <Image
-          src={user.profileImage.url}
-          alt="Profile"
-          width={40}
-          height={40}
-          className="rounded-full object-cover"
-        />
-      ) : (
-        <FaUserCircle className={`h-6 w-6 ${iconClass}`} />
-      )}
-    </Link> 
+  <Link
+  href="/user-profile"
+  className={`${!isMobile ? "mb-8" : ""}
+    ${
+      activeTab === "profile"
+        ? "bg-gray-300 shadow-sm p-2 rounded-full"
+        : ""
+    }
+    focus:outline-none`}
+>
+  {user?.profileImage?.url ? (
+    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
+      <Image
+        src={user.profileImage.url}
+        alt="Profile"
+        width={40}
+        height={40}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  ) : (
+    <FaUserCircle className={`h-10 w-10 ${iconClass}`} />
+  )}
+</Link>
     <Link
       href="/setting"
       className={`${!isMobile ? "mb-8" : ""}

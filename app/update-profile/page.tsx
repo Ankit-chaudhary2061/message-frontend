@@ -70,22 +70,21 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   try {
     const formData = new FormData();
 
-    formData.append("username", data.username);
-    formData.append("about", data.about);
+    formData.append("username", data.username.trim());
+    formData.append("about", data.about.trim());
     formData.append("agreed", String(data.agreed));
 
-    // IMPORTANT FIX
     if (data.profileImage) {
       formData.append("profileImage", data.profileImage);
-    } else {
+    } else if (avatar) {
       formData.append("avatar", avatar);
     }
 
     await dispatch(updateProfile(formData));
 
-    router.push("/profile");
+    router.push("/home");
   } catch (error) {
-    console.error("UPDATE PROFILE ERROR:", error);
+    console.error(error);
   }
 };
 

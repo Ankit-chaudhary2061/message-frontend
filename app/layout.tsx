@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { ToastContainer } from "react-toastify";
 import Providers from "@/src/service/provider";
+import SocketProvider from "@/src/lib/socket/socket-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+         <SocketProvider>
+    {children}
+  </SocketProvider>
 
           <ToastContainer
             position="top-center"

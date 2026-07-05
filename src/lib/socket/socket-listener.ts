@@ -7,8 +7,10 @@ import {
   deleteMessage,
   updateMessageStatus,
   setTyping,
-  setError,
+  setError,updateUserStatus,
+  updateReaction,
 } from "../store/chat/chat-slice";
+
 
 export const registerSocketListeners = ( 
   socket: Socket,
@@ -100,9 +102,9 @@ export const registerSocketListeners = (
    *
    * We'll create a reducer later.
    */
-  socket.on("reaction_updated", (data) => {
-    console.log("Reaction Updated", data);
-  });
+socket.on("reaction_updated", (message) => {
+  dispatch(updateReaction(message));
+});
 
   /**
    * ==========================
@@ -111,9 +113,22 @@ export const registerSocketListeners = (
    *
    * We'll create reducers later.
    */
-  socket.on("user-status", (data) => {
-    console.log("User Status", data);
-  });
+  socket.on(
+    "user-status",
+    ({
+        userId,
+        isOnline,
+        lastSeen,
+    }) => {
+        dispatch(
+            updateUserStatus({
+                userId,
+                isOnline,
+                lastSeen,
+            })
+        );
+    }
+);
 
   /**
    * ==========================

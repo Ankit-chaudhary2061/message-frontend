@@ -20,7 +20,7 @@ const Layout = ({ children }: LayoutProps) => {
   const dispatch = useAppDispatch();
 
   const {
-    selectedContactId,
+    selectedUser,
     isThemeDialogOpen,
     isStatusPreviewOpen,
     statusPreviewContent,
@@ -46,8 +46,8 @@ const Layout = ({ children }: LayoutProps) => {
     };
   }, []);
 
-  const showChatList = !selectedContactId || !isMobile;
-  const showChatWindow = !!selectedContactId || !isMobile;
+  const showChatList = !selectedUser || !isMobile;
+  const showChatWindow = !!selectedUser || !isMobile;
 
   const themeClasses =
     theme === "dark"
@@ -95,7 +95,7 @@ const Layout = ({ children }: LayoutProps) => {
               className="w-full md:w-3/5 h-full"
             >
               <ChatWindow
-                selectedContact={selectedContactId ?? ""}
+                selectedUser={selectedUser ?? ""}
                 isMobile={isMobile}
               />
             </motion.div>

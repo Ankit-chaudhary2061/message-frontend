@@ -26,7 +26,7 @@ export const SideBar = () => {
     (state) => state.auth
   );
 console.log(user)
-  const { activeTab, selectedContactId } =
+  const { activeTab, selectedUser } =
     useAppSelector((state) => state.layout);
 
   const [isMobile, setIsMobile] = useState(false);
@@ -58,7 +58,7 @@ console.log(user)
       dispatch(setActiveTab("setting"));
     }
   }, [pathname, dispatch]);
-if(isMobile && selectedContactId){
+if(isMobile && selectedUser){
     return null;
 }
 const iconClass =

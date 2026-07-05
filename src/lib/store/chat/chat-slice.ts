@@ -21,7 +21,7 @@ const initialState: ChatState = {
     typing: null,
 };
 
-const chatSlice = createSlice({
+const chatSlice = createSlice({ 
     name: "chat",
     initialState,
    reducers: {
@@ -132,16 +132,16 @@ updateUserStatus(
   }
 },
 updateReaction(
-    state,
-    action: PayloadAction<IMessage>
-){
-    const index = state.messages.findIndex(
-        m => m._id === action.payload._id
-    );
+  state,
+  action: PayloadAction<IMessage>
+) {
+  const index = state.messages.findIndex(
+    (message) => message._id === action.payload._id
+  );
 
-    if(index !== -1){
-        state.messages[index] = action.payload;
-    }
+  if (index !== -1) {
+    state.messages[index] = action.payload;
+  }
 }
 }})
 

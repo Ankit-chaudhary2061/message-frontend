@@ -189,35 +189,76 @@ export function sendMessage(data: SendMessagePayload) {
   };
 }
 
-export function fetchConversations( ){
-    return async function fetchConversationsThunk(dispatch:AppDispatch){
-        try{
+// export function fetchConversations() {
+//   return async function fetchConversationsThunk(dispatch: AppDispatch) {
+//     try {
+//       dispatch(setStatus(Status.LOADING));
 
-             dispatch(setStatus(Status.LOADING));
+//       const response = await api.get("/chat/conversations");
+
+//       const conversations = response.data.data;
+
+//       dispatch(setConversations(conversations));
+
+//       if (conversations.length > 0) {
+//         const firstConversation = conversations[0];
+
+//         dispatch(setSelectedConversation(firstConversation));
+
+//         const currentUserId = localStorage.getItem("userId"); // or get from auth
+
+//         const otherUser = firstConversation.participants.find(
+//           (p: IUser) => p._id !== currentUserId
+//         );
+
+//         dispatch(setSelectedUser(otherUser || null));
+
+//         dispatch(getMessages(firstConversation._id));
+//       }
+
+//       dispatch(setStatus(Status.SUCCESS));
+//     } catch (error: any) {
+//       dispatch(setStatus(Status.ERROR));
+
+//       dispatch(
+//         setError(
+//           error.response?.data?.message ||
+//             "Failed to fetch conversations"
+//         )
+//       );
+//     }
+//   };
+// }
+
+export function fetchConversations() {
+  return async function (dispatch: AppDispatch) {
+    try {
+      dispatch(setStatus(Status.LOADING));
 
       const response = await api.get("/chat/conversations");
 
       dispatch(setConversations(response.data.data));
 
       dispatch(setStatus(Status.SUCCESS));
-        } catch (error: any) {
-            dispatch(setStatus(Status.ERROR));
-            dispatch(
-                setError(
-                    error.response?.data?.message || "Failed to fetch conversations"
-                )
-            );
-        }
+    } catch (error: any) {
+      dispatch(setStatus(Status.ERROR));
+      dispatch(
+        setError(
+          error.response?.data?.message ||
+          "Failed to fetch conversations"
+        )
+      );
     }
+  };
 }
 export function getMessages(conversationId: string) {
   return async function getMessagesThunk(dispatch: AppDispatch) {
     try {
       dispatch(setStatus(Status.LOADING));
 
-      const response = await api.get(
-        `/chat/${conversationId}/messages`
-      );
+   const response = await api.get(
+  `/chat/conversations/${conversationId}/messages`
+);
 
       dispatch(setMessages(response.data.data));
 

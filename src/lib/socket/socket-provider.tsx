@@ -15,6 +15,7 @@ export default function SocketProvider({
 }) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  // const {selectedUser: chatSelectedUser} = useAppSelector((state) => state.chat)
 
   useEffect(() => {
     if (!user?._id) return;

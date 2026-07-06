@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import { FaPlus, FaSearch } from "react-icons/fa";
 
 import { IUser } from "../lib/store/auth/auth-slice-types";
-import { useAppSelector } from "../lib/store/hook";
+import { useAppDispatch, useAppSelector } from "../lib/store/hook";
 import formatTimestamp from "../lib/utiil/fromat-time";
+import { getMessages, setSelectedConversation, setSelectedUser } from "../lib/store/chat/chat-slice";
 
 interface ChatListProps {
   contacts?: IUser[];
@@ -20,6 +21,7 @@ export const ChatList = ({
   selectedContactId,
   onSelect,
 }: ChatListProps) => {
+  const dispatch = useAppDispatch();
   const { theme } = useAppSelector((state) => state.theme);
   const { user } = useAppSelector((state) => state.auth);
 
@@ -30,7 +32,24 @@ export const ChatList = ({
       ?.toLowerCase()
       .includes(searchTerms.toLowerCase())
   );
+const handleSelect = (id: string) => {
+  console.log("Clicked contact id:", id);
 
+  const contact = contacts.find((c) => c._id === id);
+
+  console.log("Found contact:", contact);
+
+  if (!contact) return;
+
+  dispatch(setSelectedUser(contact));
+  console.log("Dispatched selected user");
+
+  if (contact.conversation) {
+    dispatch(setSelectedConversation(contact.conversation as any));
+    dispatch(getMessages(contact.conversation._id));
+    console.log("Conversation selected:", contact.conversation._id);
+  }
+};
   return (
     <div
       className={`w-full h-screen border-r ${
@@ -99,7 +118,7 @@ export const ChatList = ({
 
             const showUnreadBadge =
               conversation &&
-              conversation.unReadCounts > 0 &&
+              conversation.unreadCounts > 0 &&
               lastMessage?.receiver === user?._id;
 
             return (
@@ -107,7 +126,7 @@ export const ChatList = ({
   key={contact._id}
   whileHover={{ scale: 1.01 }}
   whileTap={{ scale: 0.98 }}
-  onClick={() => contact._id && onSelect?.(contact._id)}
+onClick={() => contact._id && handleSelect(contact._id)}
   className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200
     ${
       selectedContactId === contact._id
@@ -173,7 +192,7 @@ export const ChatList = ({
 
       {showUnreadBadge && (
         <span className="flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-green-500 text-white text-[11px] font-semibold">
-          {conversation.unReadCounts}
+          {conversation.unreadCounts}
         </span>
       )}
     </div>

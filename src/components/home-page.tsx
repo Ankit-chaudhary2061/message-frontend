@@ -22,7 +22,7 @@ const HomePage = () => {
     (state) => state.auth
   );
 
-  const { selectedContactId } = useAppSelector(
+  const { selectedUser: selectedContactId } = useAppSelector(
     (state) => state.layout
   );
 

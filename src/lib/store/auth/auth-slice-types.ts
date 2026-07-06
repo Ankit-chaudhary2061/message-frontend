@@ -18,8 +18,11 @@ export interface IConversation {
 
   lastMessage?: IMessage;
 
-  unReadCounts: number;
+  unreadCounts: number;
   lastMessageTime?: Date;
+  
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IUser {

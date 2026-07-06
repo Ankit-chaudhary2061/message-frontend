@@ -42,7 +42,7 @@ export interface IMessage {
   _id: string;
 
   conversationId: string;
-
+conversation:IConversation,
   sender: IUser;
   receiver: IUser;
 
@@ -71,7 +71,7 @@ export interface IConversation {
 
   lastMessageTime: string;
 
-  unreadCount: number;
+  unreadCounts: number;
 
   createdAt: string;
   updatedAt: string;

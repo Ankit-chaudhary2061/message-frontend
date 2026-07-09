@@ -302,7 +302,7 @@ export function markMessagesAsRead(messageIds: string[]) {
 export function deleteMessageThunk(messageId: string) {
   return async function (dispatch: AppDispatch) {
     try {
-      await api.delete(`/chat/message/${messageId}`);
+      await api.delete(`/chat/messages/${messageId}`);
 
       dispatch(deleteMessage(messageId));
     } catch (error: any) {
@@ -355,6 +355,31 @@ export function deleteConversation(
         setError(
           error.response?.data?.message ||
           "Failed to delete conversation"
+        )
+      );
+    }
+  };
+}
+
+export function addReactionThunk(
+  messageId: string,
+  emoji: string
+) {
+  return async function (dispatch: AppDispatch) {
+    try {
+      const response = await api.patch(
+  `/chat/message/${messageId}/reaction`,
+        {
+          emoji,
+        }
+      );
+
+      dispatch(updateReaction(response.data.data));
+    } catch (error: any) {
+      dispatch(
+        setError(
+          error.response?.data?.message ||
+            "Failed to add reaction"
         )
       );
     }

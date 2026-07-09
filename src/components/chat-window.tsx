@@ -9,11 +9,11 @@ import {
 import {isToday, isYesterday, format} from "date-fns";
 import Image from "next/image";
 import wp from "../../src/images/wp.png"
-import { FaArrowLeft, FaEllipsisV, FaLock, FaVideo } from "react-icons/fa";
+import { FaArrowLeft, FaEllipsisV, FaFile, FaImage, FaLock, FaPaperclip, FaPaperPlane, FaSmile, FaTimes, FaVideo } from "react-icons/fa";
 import { IConversation } from "../lib/store/chat/chat-slice-types";
 import MessageBubble from "./message-bubble";
 import { deleteMessageThunk } from "../lib/store/chat/chat-slice";
-
+import EmojiPicker, { Theme } from "emoji-picker-react";
 
 
 interface ChatWindowProps {
@@ -41,7 +41,26 @@ const [selectedFile, setSelectedFile] = useState<File | null>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 const messageEndRef = useRef<HTMLDivElement>(null);
 const fileInputRef = useRef<HTMLInputElement>(null);
+const fileMenuRef = useRef<HTMLDivElement>(null);
+const emojiPicker = useRef<HTMLDivElement>(null);
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      emojiPicker.current &&
+      !emojiPicker.current.contains(event.target as Node)
+    ) {
+      setShowEmojiPicker(false);
+    }
+  };
 
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () =>
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+}, []);
 const online = chatSelectedUser?.isOnline;
  const lastSeen = chatSelectedUser?.lastSeen;
 const isTyping =
@@ -113,15 +132,25 @@ useEffect(() => {
     selectedConversation,
 ]);
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleFileChange = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
   const file = e.target.files?.[0];
-  if (file) {
-    setSelectedFile(file);
-    setShowFileMenu(false);
-    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
-      setFilePreview(URL.createObjectURL(file));
-    }
+
+  if (!file) return;
+
+  setSelectedFile(file);
+
+  if (
+    file.type.startsWith("image/") ||
+    file.type.startsWith("video/")
+  ) {
+    setFilePreview(URL.createObjectURL(file));
   }
+
+  setShowFileMenu(false);
+
+  e.target.value = "";
 };
 const handleSendMessage = async () => {
   if (!chatSelectedUser) return;
@@ -355,10 +384,118 @@ return (
 ))}
 <div ref={messageEndRef}/>
 </div>
+{
+  filePreview && (
+
+    <div className="relative p-2">
+      <Image
+  src={filePreview}
+  alt="file-preview"
+  width={320}
+  height={320}
+  className="object-cover rounded-lg shadow-lg mx-auto"
+/>
+<button onClick={()=>{setFilePreview(null);
+  setSelectedFile(null)}
+} 
+className="absolute top-1 right-1 bg-red-500  hover:bg-red-600 text-white rounded-full p-1">
+<FaTimes className="h-4 w-4"/>
+
+
+</button>
+      </div>
+  )
+}
 
       {/* Message Input */}
-      <div>
+      <div className={`p-4 ${theme === 'dark' ? "bg-[#303430]" : "bg-white" } flex items-center space-x-2 relative`}>
+        <button  className=" focus:outline-none" 
+        onClick={()=> setShowEmojiPicker(!showEmojiPicker)}
+        >
+
+<FaSmile 
+className={`h-6 w-6 ${theme === 'dark' ? 'text-gray-400' : "text-gray-500"}`}
+
+/>
+
+        </button>
         {/* Input */}
+        {
+  showEmojiPicker && (
+    <div
+      ref={emojiPicker}
+      className="absolute left-0 bottom-14 z-50"
+    >
+      <EmojiPicker
+  theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
+  onEmojiClick={(emojiData) => {
+    setMessage((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  }}
+/>
+    </div>
+  )
+}
+
+<div className="relative">
+  <button
+  className="focus:outline-none"
+  onClick={()=> setShowFileMenu(!showFileMenu)}
+  >
+<FaPaperclip className={`h-6 w-6 ${theme === "dark" ? "text-gray-400" : "text-gray-500"} mt-2`}/>
+
+
+  </button>
+{showFileMenu && (
+
+  <div className={`absolute bottom-full left-0 mb-2 ${theme === 'dark' ? "bg-gray-700" : "bg-white"} rounded-lg shadow-lg`}>
+<input type="file"
+ref={fileInputRef}
+onChange={handleFileChange}
+accept="image/*,video/*,.pdf,.doc,.docx"
+className="hidden"
+
+/>
+<button 
+onClick={() =>fileInputRef.current?.click()}
+className={`flex items-center px-4 py-2 w-full transition-colors hover:bg-gray-100 ${theme === 'dark' ? "hover:bg-gray-500" :"bg-gray-100"}`}
+>
+
+  <FaImage className="mr-2"/> Image/video
+</button>
+<button 
+onClick={() =>fileInputRef.current?.click()}
+className={`flex items-center px-4 py-2 w-full transition-colors hover:bg-gray-100 ${theme === 'dark' ? "hover:bg-gray-500" :"bg-gray-100"}`}
+>
+
+  <FaFile className="mr-2"/> documents
+</button>
+  </div>
+)
+
+}
+     
+
+</div>
+
+<input
+type="text"
+value={message}
+onChange={(e)=>setMessage(e.target.value)}
+onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    handleSendMessage();
+  }
+}}
+placeholder="Type a Message"
+className={`flex-grow px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 ${theme === 'dark' ? "bg-gray-700 text-white border-gray-600" : "bg-white text-black border-gray-300"}`}
+/>
+
+<button onClick={handleSendMessage}
+className="focus:outline-none"
+>
+<FaPaperPlane className="h-6 w-6 text-green-500"/>
+</button>
       </div>
     </div>
   </>

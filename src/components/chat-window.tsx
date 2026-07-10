@@ -15,7 +15,6 @@ import MessageBubble from "./message-bubble";
 import { deleteMessageThunk } from "../lib/store/chat/chat-slice";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 
-
 interface ChatWindowProps {
   selectedUser: string | null;
   isMobile: boolean;
@@ -132,24 +131,57 @@ useEffect(() => {
     selectedConversation,
 ]);
 
-const handleFileChange = (
+const handleFileChange = async (
   e: React.ChangeEvent<HTMLInputElement>
 ) => {
-  const file = e.target.files?.[0];
+  let file = e.target.files?.[0];
 
   if (!file) return;
 
+  // Convert HEIC/HEIF to JPEG
+ if (
+  file.type === "image/heic" ||
+  file.type === "image/heif" ||
+  file.name.toLowerCase().endsWith(".heic") ||
+  file.name.toLowerCase().endsWith(".heif")
+) {
+  try {
+    const { default: heic2any } = await import("heic2any");
+
+    const convertedBlob = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.9,
+    });
+
+    file = new File(
+      [convertedBlob as Blob],
+      file.name.replace(/\.(heic|heif)$/i, ".jpg"),
+      {
+        type: "image/jpeg",
+      }
+    );
+  } catch (err) {
+    console.error("HEIC conversion failed:", err);
+    return;
+  }
+}
+console.log("Name:", file.name);
+console.log("Type:", file.type);
+console.log("Size:", file.size);
   setSelectedFile(file);
 
   if (
     file.type.startsWith("image/") ||
     file.type.startsWith("video/")
   ) {
-    setFilePreview(URL.createObjectURL(file));
+  const previewUrl = URL.createObjectURL(file);
+console.log("Preview URL:", previewUrl);
+
+setFilePreview(previewUrl);
   }
 
   setShowFileMenu(false);
-
   e.target.value = "";
 };
 const handleSendMessage = async () => {
@@ -166,7 +198,7 @@ const handleSendMessage = async () => {
         file: selectedFile ?? undefined,
       })
     );
-await dispatch(getMessages(selectedConversation!._id));
+
     setMessage("");
     setSelectedFile(null);
     setFilePreview(null);
@@ -386,24 +418,25 @@ return (
 </div>
 {
   filePreview && (
-
-    <div className="relative p-2">
+    <div className="relative p-2 flex justify-center border-b border-gray-200 dark:border-gray-700">
       <Image
-  src={filePreview}
-  alt="file-preview"
-  width={320}
-  height={320}
-  className="object-cover rounded-lg shadow-lg mx-auto"
-/>
-<button onClick={()=>{setFilePreview(null);
-  setSelectedFile(null)}
-} 
-className="absolute top-1 right-1 bg-red-500  hover:bg-red-600 text-white rounded-full p-1">
-<FaTimes className="h-4 w-4"/>
+        src={filePreview}
+        alt="file-preview"
+        width={320}
+        height={320}
+        className="max-h-60 w-auto object-contain rounded-lg shadow-lg"
+      />
 
-
-</button>
-      </div>
+      <button
+        onClick={() => {
+          setFilePreview(null);
+          setSelectedFile(null);
+        }}
+        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md"
+      >
+        <FaTimes className="h-4 w-4" />
+      </button>
+    </div>
   )
 }
 

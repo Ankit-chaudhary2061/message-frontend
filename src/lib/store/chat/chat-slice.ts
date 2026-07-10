@@ -168,12 +168,12 @@ export function sendMessage(data: SendMessagePayload) {
       if (data.file) {
         formData.append("file", data.file);
       }
-
+console.log(data.file);
       const response = await api.post(
         "/chat/send-message",
         formData
       );
-
+console.log('data',response.data.data);
       dispatch(addMessage(response.data.data));
 
       dispatch(setStatus(Status.SUCCESS));

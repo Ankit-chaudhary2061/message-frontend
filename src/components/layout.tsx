@@ -14,14 +14,24 @@ import { div } from "framer-motion/client";
 
 interface LayoutProps {
   children: ReactNode;
+  isThemeDialogOpen?: boolean;
+  toggleThemedialog?: () => void;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({
+  children,
+  isThemeDialogOpen: propThemeDialogOpen,
+  toggleThemedialog,
+}: LayoutProps) => {
+
+  const {
+    isThemeDialogOpen,
+  } = useAppSelector((state) => state.layout);
   const dispatch = useAppDispatch();
 
   const {
     selectedUser,
-    isThemeDialogOpen,
+   
     isStatusPreviewOpen,
     statusPreviewContent,
   } = useAppSelector((state) => state.layout);

@@ -100,7 +100,11 @@ useOutsideClick(optionRef,()=>{
   // Render
   // ==========================
   return (
-   <div className={`chat ${bubbleClass}`}>
+  <div
+  className={`chat ${bubbleClass} ${
+    message.reactions?.length ? "mb-6" : ""
+  }`}
+>
   <div
     ref={messageRef}
     className={`${bubbleContentClass} relative group`}

@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import { FaPlus, FaSearch } from "react-icons/fa";
 
 import { IUser } from "../lib/store/auth/auth-slice-types";
-import { useAppSelector } from "../lib/store/hook";
+import { useAppDispatch, useAppSelector } from "../lib/store/hook";
 import formatTimestamp from "../lib/utiil/fromat-time";
+import { getMessages, setSelectedConversation, setSelectedUser } from "../lib/store/chat/chat-slice";
 
 interface ChatListProps {
   contacts?: IUser[];
@@ -20,6 +21,7 @@ export const ChatList = ({
   selectedContactId,
   onSelect,
 }: ChatListProps) => {
+  const dispatch = useAppDispatch();
   const { theme } = useAppSelector((state) => state.theme);
   const { user } = useAppSelector((state) => state.auth);
 
@@ -30,7 +32,24 @@ export const ChatList = ({
       ?.toLowerCase()
       .includes(searchTerms.toLowerCase())
   );
+const handleSelect = (id: string) => {
+  console.log("Clicked contact id:", id);
 
+  const contact = contacts.find((c) => c._id === id);
+
+  console.log("Found contact:", contact);
+
+  if (!contact) return;
+
+  dispatch(setSelectedUser(contact));
+  console.log("Dispatched selected user");
+
+  if (contact.conversation) {
+    dispatch(setSelectedConversation(contact.conversation as any));
+    dispatch(getMessages(contact.conversation._id));
+    console.log("Conversation selected:", contact.conversation._id);
+  }
+};
   return (
     <div
       className={`w-full h-screen border-r ${
@@ -99,90 +118,86 @@ export const ChatList = ({
 
             const showUnreadBadge =
               conversation &&
-              conversation.unReadCounts > 0 &&
+              conversation.unreadCounts > 0 &&
               lastMessage?.receiver === user?._id;
 
             return (
-              <motion.div
-                key={contact._id}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() =>
-                  contact._id &&
-                  onSelect?.(contact._id)
-                }
-                className={`flex items-center p-3 cursor-pointer transition-colors ${
-                  selectedContactId === contact._id
-                    ? "bg-green-100"
-                    : theme === "dark"
-                    ? "hover:bg-gray-800"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                {/* Avatar */}
-                <Image
-                  src={
-                    contact.profileImage?.url ||
-                    "/default-avatar.png"
-                  }
-                  alt={
-                    contact.username || "Contact"
-                  }
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover"
-                />
+             <motion.div
+  key={contact._id}
+  whileHover={{ scale: 1.01 }}
+  whileTap={{ scale: 0.98 }}
+onClick={() => contact._id && handleSelect(contact._id)}
+  className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200
+    ${
+      selectedContactId === contact._id
+        ? "bg-green-100 dark:bg-green-900/30"
+        : theme === "dark"
+        ? "hover:bg-gray-800"
+        : "hover:bg-gray-100"
+    }
+  `}
+>
+  {/* Avatar */}
+  <div className="relative shrink-0">
+    <Image
+      src={contact.profileImage?.url || "/default-avatar.png"}
+      alt={contact.username || "Contact"}
+      width={56}
+      height={56}
+      className="w-14 h-14 rounded-full object-cover border border-gray-300 dark:border-gray-700"
+    />
 
-                {/* Content */}
-                <div className="ml-3 flex-1 min-w-0">
-                  {/* Top Row */}
-                  <div className="flex justify-between items-center">
-                    <h3
-                      className={`font-semibold truncate ${
-                        theme === "dark"
-                          ? "text-white"
-                          : "text-black"
-                      }`}
-                    >
-                      {contact.username}
-                    </h3>
+    {/* Online Indicator (optional) */}
+    {/* {contact.isOnline && (
+      <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-green-500 border-2 border-white dark:border-gray-900"></span>
+    )} */}
+  </div>
 
-                    {lastMessage && (
-                      <span
-                        className={`text-xs ${
-                          theme === "dark"
-                            ? "text-gray-400"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {formatTimestamp(
-                          lastMessage.createdAt
-                        )}
-                      </span>
-                    )}
-                  </div>
+  {/* Right Content */}
+  <div className="flex-1 min-w-0">
+    {/* Top */}
+    <div className="flex items-center justify-between">
+      <h3
+        className={`font-semibold text-[16px] truncate ${
+          theme === "dark" ? "text-white" : "text-gray-900"
+        }`}
+      >
+        {contact.username}
+      </h3>
 
-                  {/* Bottom Row */}
-                  <div className="flex justify-between items-center mt-1">
-                    <p
-                      className={`text-sm truncate ${
-                        theme === "dark"
-                          ? "text-gray-400"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {lastMessage?.content ||
-                        "Start a conversation"}
-                    </p>
+      {lastMessage && (
+        <span
+          className={`text-xs whitespace-nowrap ml-2 ${
+            theme === "dark"
+              ? "text-gray-400"
+              : "text-gray-500"
+          }`}
+        >
+          {formatTimestamp(lastMessage.createdAt)}
+        </span>
+      )}
+    </div>
 
-                    {showUnreadBadge && (
-                      <span className="ml-2 flex items-center justify-center min-w-6 h-6 px-2 text-xs font-semibold rounded-full bg-green-500 text-white">
-                        {conversation.unReadCounts}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
+    {/* Bottom */}
+    <div className="flex items-center justify-between mt-1">
+      <p
+        className={`text-sm truncate pr-2 ${
+          theme === "dark"
+            ? "text-gray-400"
+            : "text-gray-500"
+        }`}
+      >
+        {lastMessage?.content || "Start a conversation"}
+      </p>
+
+      {showUnreadBadge && (
+        <span className="flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-green-500 text-white text-[11px] font-semibold">
+          {conversation.unreadCounts}
+        </span>
+      )}
+    </div>
+  </div>
+</motion.div>
             );
           })
         )}

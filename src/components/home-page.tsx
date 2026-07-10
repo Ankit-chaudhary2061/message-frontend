@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import Layout from "./layout";
@@ -10,23 +11,33 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "../lib/store/hook";
-import { getAllUsers } from "../lib/store/auth/auth-slice";
+import { checkAuth, getAllUsers } from "../lib/store/auth/auth-slice";
 
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
-  const { users, usersStatus } = useAppSelector(
+  const { users, user } = useAppSelector(
     (state) => state.auth
   );
 
-  const { selectedContactId } = useAppSelector(
+  const { selectedUser: selectedContactId } = useAppSelector(
     (state) => state.layout
   );
 
   useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
+    const loadHomeData = async () => {
+      try {
+        await dispatch(checkAuth());
+        await dispatch(getAllUsers());
+      } catch {
+        router.replace("/login");
+      }
+    };
+
+    loadHomeData();
+  }, [dispatch, router]);
 
   return (
     <Layout>

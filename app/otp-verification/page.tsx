@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense, type FormEvent, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   resendOtp,
@@ -10,11 +11,10 @@ import { useAppDispatch, useAppSelector } from "@/src/lib/store/hook";
 import { RootState } from "@/src/lib/store/store";
 import { Status } from "@/src/lib/types/global-types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { MessageCircle } from "lucide-react";
 
-const OTPVerification = () => {
+const OTPVerificationContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -221,6 +221,14 @@ useEffect(() => {
         </div>
       </motion.div>
     </div>
+  );
+};
+
+const OTPVerification = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <OTPVerificationContent />
+    </Suspense>
   );
 };
 

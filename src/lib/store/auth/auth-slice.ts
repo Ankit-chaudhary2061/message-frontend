@@ -122,7 +122,8 @@ export function updateProfile(formData: FormData) {
 
       dispatch(setUser(response.data.user));
       dispatch(setProfileStatus(Status.SUCCESS));
-
+console.log(response.data);
+console.log(response.data.user);
       return response.data;
     } catch (error: any) {
       dispatch(setProfileStatus(Status.ERROR));

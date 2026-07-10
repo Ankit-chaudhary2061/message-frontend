@@ -14,14 +14,24 @@ import { div } from "framer-motion/client";
 
 interface LayoutProps {
   children: ReactNode;
+  isThemeDialogOpen?: boolean;
+  toggleThemedialog?: () => void;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({
+  children,
+  isThemeDialogOpen: propThemeDialogOpen,
+  toggleThemedialog,
+}: LayoutProps) => {
+
+  const {
+    isThemeDialogOpen,
+  } = useAppSelector((state) => state.layout);
   const dispatch = useAppDispatch();
 
   const {
-    selectedContactId,
-    isThemeDialogOpen,
+    selectedUser,
+   
     isStatusPreviewOpen,
     statusPreviewContent,
   } = useAppSelector((state) => state.layout);
@@ -46,8 +56,8 @@ const Layout = ({ children }: LayoutProps) => {
     };
   }, []);
 
-  const showChatList = !selectedContactId || !isMobile;
-  const showChatWindow = !!selectedContactId || !isMobile;
+  const showChatList = !selectedUser || !isMobile;
+  const showChatWindow = !!selectedUser || !isMobile;
 
   const themeClasses =
     theme === "dark"
@@ -95,7 +105,7 @@ const Layout = ({ children }: LayoutProps) => {
               className="w-full md:w-3/5 h-full"
             >
               <ChatWindow
-                selectedContact={selectedContactId ?? ""}
+                selectedUser={selectedUser ?? ""}
                 isMobile={isMobile}
               />
             </motion.div>

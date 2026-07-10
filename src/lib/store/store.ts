@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import authSlice from './auth/auth-slice'
 import themeSlice from './themestore/theme-slice'
 import uiSlice from './layout/ui-slice'
+import chatSlice from "./chat/chat-slice";
 const store = configureStore({
     reducer:{
 auth : authSlice,
 theme :themeSlice,
-layout : uiSlice
+layout : uiSlice,
+chat:chatSlice
     }
 })
 export default store

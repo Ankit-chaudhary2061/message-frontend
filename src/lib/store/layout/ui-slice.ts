@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UIState {
   activeTab: "chats" | "status" | "profile" | "setting";
-  selectedContactId: string | null;
+  selectedUser: string | null;
 
   isThemeDialogOpen: boolean;
 
@@ -12,7 +12,7 @@ interface UIState {
 
 const initialState: UIState = {
   activeTab: "chats",
-  selectedContactId: null,
+  selectedUser: null,
 
   isThemeDialogOpen: false,
 
@@ -33,11 +33,11 @@ const uiSlice = createSlice({
       state.activeTab = action.payload;
     },
 
-    setSelectedContact: (
+    setSelectedUser: (
       state,
       action: PayloadAction<string | null>
     ) => {
-      state.selectedContactId = action.payload;
+      state.selectedUser = action.payload;
     },
 
     toggleThemeDialog: (state) => {
@@ -70,7 +70,7 @@ const uiSlice = createSlice({
 
 export const {
   setActiveTab,
-  setSelectedContact,
+  setSelectedUser,
   toggleThemeDialog,
   setThemeDialog,
   openStatusPreview,

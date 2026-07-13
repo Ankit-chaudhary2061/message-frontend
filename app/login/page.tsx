@@ -121,6 +121,45 @@ const Login = () => {
   }, [loginStatus, mode, phoneNumber, email, selectedCountry]);
 
   /* ---------------- SUBMIT HANDLER ---------------- */
+// const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+//   e.preventDefault();
+
+//   if (loginStatus === Status.LOADING) {
+//     toast.info("Request already in progress");
+//     return;
+//   }
+
+//   toast.info("Sending OTP...");
+
+//   try {
+//     await dispatch(
+//       loginUser({
+//         phoneNumber:
+//           mode === "phone"
+//             ? phoneNumber.trim()
+//             : undefined,
+
+//         phoneSuffix:
+//           mode === "phone"
+//             ? selectedCountry.dialCode
+//             : undefined,
+
+//         email:
+//           mode === "email"
+//             ? email.trim()
+//             : undefined,
+//       })
+//     );
+//   } catch (error: any) {
+//     console.error(error);
+//     const message =
+//       (error && (error.message || error?.error || error?.message?.toString())) ||
+//       "Failed to send OTP";
+//     toast.error(typeof message === "string" ? message : "Failed to send OTP");
+//   }
+// };
+
+
 const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
@@ -129,28 +168,29 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     return;
   }
 
-  toast.info("Sending OTP...");
+  const payload = {
+    phoneNumber:
+      mode === "phone"
+        ? phoneNumber.trim()
+        : undefined,
+
+    phoneSuffix:
+      mode === "phone"
+        ? selectedCountry.dialCode
+        : undefined,
+
+    email:
+      mode === "email"
+        ? email.trim()
+        : undefined,
+  };
+
+  console.log("MODE:", mode);
+  console.log("PAYLOAD:", payload);
 
   try {
-    await dispatch(
-      loginUser({
-        phoneNumber:
-          mode === "phone"
-            ? phoneNumber.trim()
-            : undefined,
-
-        phoneSuffix:
-          mode === "phone"
-            ? selectedCountry.dialCode
-            : undefined,
-
-        email:
-          mode === "email"
-            ? email.trim()
-            : undefined,
-      })
-    );
-  } catch (error: any) {
+    await dispatch(loginUser(payload));
+  } catch (error :any) {
     console.error(error);
     const message =
       (error && (error.message || error?.error || error?.message?.toString())) ||
@@ -158,7 +198,6 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     toast.error(typeof message === "string" ? message : "Failed to send OTP");
   }
 };
-
   /* ---------------- UI ---------------- */
   return (
     <div

@@ -1,145 +1,243 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { FaPlus, FaUser, FaWhatsapp } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/src/lib/store/hook";
 import { RootState } from "@/src/lib/store/store";
-import { updateProfile, UpdateProfileData } from "@/src/lib/store/auth/auth-slice";
+import { updateProfile } from "@/src/lib/store/auth/auth-slice";
+import Spinner from "@/src/lib/utiil/spinner";
 import { Status } from "@/src/lib/types/global-types";
-import Image from "next/image";
-
+import { FaInfoCircle } from "react-icons/fa";
 const UpdateProfile = () => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  const theme = useAppSelector((state: RootState) => state.theme.theme);
-  const profileStatus = useAppSelector((state: RootState) => state.auth.profileStatus);
-const avatars = [
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Jack",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Emma",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Alex",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Sophia",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Noah",
-  "https://api.dicebear.com/9.x/adventurer/svg?seed=Olivia",
-];
+  const router = useRouter();
+const { profileStatus } = useAppSelector((state) => state.auth);
+  const theme = useAppSelector(
+    (state: RootState) => state.theme.theme
+  );
 
+const [username, setUsername] = useState("");
+const [about, setAbout] = useState("");
+const [agreed, setAgreed] = useState(false);
 
+const [profileImage, setProfileImage] = useState<File | null>(null);
+const [previewImage, setPreviewImage] = useState("");
+const [selectedAvatar, setSelectedAvatar] = useState("");
 
-  const [data, setData] = useState<UpdateProfileData>({
-    username: "",
-    about: "",
-    agreed: false,
-    profileImage: null,
-  });
-const [avatar,setAvatar] = useState(avatars[0])
-const handleChange = (
-  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = e.target;
-
-  setData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-const handleCheckboxChange = (
-  e: ChangeEvent<HTMLInputElement>
-) => {
-  setData((prev) => ({
-    ...prev,
-    agreed: e.target.checked,
-  }));
-};
 const handleImageChange = (
-  e: ChangeEvent<HTMLInputElement>
+  e: React.ChangeEvent<HTMLInputElement>
 ) => {
   const file = e.target.files?.[0];
 
   if (!file) return;
 
-  setData((prev) => ({
-    ...prev,
-    profileImage: file,
-  }));
+  setProfileImage(file);
+  setPreviewImage(URL.createObjectURL(file));
+  setSelectedAvatar("");
 };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-
-  try {
     const formData = new FormData();
 
-    formData.append("username", data.username.trim());
-    formData.append("about", data.about.trim());
-    formData.append("agreed", String(data.agreed));
+    formData.append("username", username);
+    formData.append("about", about);
+    formData.append("agreed", String(agreed));
 
-    if (data.profileImage) {
-      formData.append("profileImage", data.profileImage);
-    } else if (avatar) {
-      formData.append("avatar", avatar);
+    if (profileImage) {
+  formData.append("profileImage", profileImage);
+}
+
+if (selectedAvatar) {
+  formData.append("avatar", selectedAvatar);
+}
+
+    try {
+      const response = await dispatch(updateProfile(formData));
+
+      if (response.success) {
+        router.push("/home");
+      }
+    } catch (error) {
+      console.error(error);
     }
+  };
+  const isDark = theme === "dark";
+  const inputClass = `w-full rounded-xl border px-4 py-3 transition-all duration-300
+${
+  isDark
+    ? "bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
+    : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
+}
+focus:outline-none focus:ring-2 focus:ring-green-500`;
 
-    await dispatch(updateProfile(formData));
+const iconClass = isDark ? "text-gray-400" : "text-gray-500";
 
-    router.push("/home");
-  } catch (error) {
-    console.error(error);
-  }
-};
-
+const labelClass = `mb-2 block text-sm font-medium ${
+  isDark ? "text-gray-300" : "text-gray-700"
+}`;
+const avatars = [
+  "https://api.dicebear.com/9.x/notionists/png?seed=Alex",
+  "https://api.dicebear.com/9.x/notionists/png?seed=Emma",
+  "https://api.dicebear.com/9.x/notionists/png?seed=John",
+  "https://api.dicebear.com/9.x/notionists/png?seed=Lucas",
+  "https://api.dicebear.com/9.x/notionists/png?seed=Olivia",
+  "https://api.dicebear.com/9.x/notionists/png?seed=James",
+  "https://api.dicebear.com/9.x/notionists/png?seed=Mia",
+  "https://api.dicebear.com/9.x/notionists/png?seed=Noah",
+];
+console.log(avatars);
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-4 ${
-        theme === "dark"
-          ? "bg-gray-900"
-          : "bg-linear-to-br from-green-400 to-blue-500"
-      }`}
-    >
+   <div
+  className={`min-h-screen flex items-center justify-center px-4 py-10 transition-all duration-500 ${
+    isDark
+      ? "bg-gradient-to-br from-slate-900 via-gray-900 to-black"
+      : "bg-gradient-to-br from-green-100 via-white to-green-200"
+  }`}
+>
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`w-full max-w-md p-8 rounded-2xl shadow-2xl ${
-          theme === "dark"
-            ? "bg-gray-800 text-white"
-            : "bg-white text-gray-800"
-        }`}
-      >
-        {/* HEADER */}
-        <div className="w-24 h-24 bg-green-500 rounded-full mx-auto flex items-center justify-center mb-5">
-          <FaWhatsapp className="text-white text-5xl" />
-        </div>
+  initial={{ opacity: 0, scale: 0.9, y: 40 }}
+  animate={{ opacity: 1, scale: 1, y: 0 }}
+  transition={{ duration: 0.4 }}
+  className={`w-full max-w-lg rounded-3xl border backdrop-blur-xl shadow-2xl p-8 ${
+    isDark
+      ? "bg-gray-900/80 border-gray-700 text-white"
+      : "bg-white/80 border-white text-gray-900"
+  }`}
+>
+        {/* Header */}
+      {/* <div className="flex flex-col items-center mb-8">
+  <div className="h-24 w-24 rounded-full bg-green-500 flex items-center justify-center shadow-xl">
+    <FaWhatsapp className="text-white text-5xl" />
+  </div>
 
-        <h1 className="text-3xl font-bold text-center">Update Profile</h1>
-        <p className="text-center text-sm opacity-70 mb-6">
-          Update your username, bio, and profile image.
-        </p>
+  <h1 className="mt-5 text-3xl font-bold">
+    Complete your profile
+  </h1>
 
+  <p
+    className={`mt-2 text-center ${
+      isDark ? "text-gray-400" : "text-gray-500"
+    }`}
+  >
+    Choose a profile picture and tell everyone
+    a little about yourself.
+  </p>
+</div> */}
+<div className="mb-8 flex flex-col items-center">
+  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500 shadow-xl">
+    <FaWhatsapp className="text-5xl text-white" />
+  </div>
+
+  <h1 className="mt-5 text-3xl font-bold">
+    Complete Your Profile
+  </h1>
+
+  <p
+    className={`mt-2 max-w-sm text-center ${
+      isDark ? "text-gray-400" : "text-gray-500"
+    }`}
+  >
+    Choose a profile picture and tell everyone a little
+    about yourself.
+  </p>
+</div>
         <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col items-center mb-4">
-  <div className="relative w-24 h-24 mb-2">
+          {/* Profile Image */}
+    {/* <div className="mb-6 flex flex-col items-center">
+  {/* Selected Image */}
+  {/* <div className="relative mb-3 h-24 w-24">
     <Image
       src={
-        data.profileImage
-          ? URL.createObjectURL(data.profileImage)
-          : avatar
+        previewImage ||
+        selectedAvatar ||
+        "/default-avatar.png"
       }
       alt="Profile"
       fill
-      unoptimized
-      className="rounded-full object-cover"
+      className="rounded-full object-cover border-2 border-green-500"
     />
 
     <label
       htmlFor="profile-picture"
-      className="absolute bottom-0 right-0 bg-green-500 text-white p-2 rounded-full cursor-pointer hover:bg-green-600"
+      className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-green-500 p-2 text-white transition hover:bg-green-600"
     >
-      <FaPlus className="w-4 h-4" />
+      <FaPlus size={14} />
     </label>
 
     <input
-      type="file"
       id="profile-picture"
+      type="file"
+      accept="image/*"
+      onChange={handleImageChange}
+      className="hidden"
+    />
+  </div> */}
+
+  {/* <p
+    className={`mb-4 text-sm ${
+      isDark ? "text-gray-300" : "text-gray-500"
+    }`}
+  >
+    Choose an avatar or upload your own
+  </p> */}
+
+  {/* Avatar Grid */}
+  {/* <div className="grid grid-cols-4 gap-3">
+    {avatars.map((avatar, index) => (
+      <button
+        type="button"
+        key={index}
+        onClick={() => {
+          setSelectedAvatar(avatar);
+          setPreviewImage("");
+          setProfileImage(null);
+        }}
+        className={`overflow-hidden rounded-full transition-transform duration-300 hover:scale-110 ${
+          selectedAvatar === avatar
+            ? "ring-2 ring-green-500 ring-offset-2"
+            : ""
+        }`}
+      >
+        <Image
+          src={avatar}
+          alt={`Avatar ${index + 1}`}
+          width={50}
+          height={50}
+          className="rounded-full object-cover"
+        />
+      </button>
+    ))}
+  </div> */}
+{/* </div> */} *
+
+
+<div className="mb-8 flex flex-col items-center">
+  <div className="relative h-28 w-28">
+    <Image
+      src={
+        previewImage ||
+        selectedAvatar ||
+        "/default-avatar.png"
+      }
+      alt="Profile"
+      fill
+      className="rounded-full border-4 border-green-500 object-cover shadow-lg"
+    />
+
+    <label
+      htmlFor="profile-picture"
+      className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition hover:scale-105 hover:bg-green-600"
+    >
+      <FaPlus />
+    </label>
+
+    <input
+      id="profile-picture"
+      type="file"
       accept="image/*"
       onChange={handleImageChange}
       className="hidden"
@@ -147,106 +245,233 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
   </div>
 
   <p
-    className={`text-sm ${
-      theme === "dark"
-        ? "text-gray-300"
-        : "text-gray-500"
-    } mb-2`}
+    className={`mt-4 text-sm ${
+      isDark ? "text-gray-400" : "text-gray-500"
+    }`}
   >
-    Choose an avatar
+    Upload your photo or choose an avatar
   </p>
 
-  <div className="flex gap-2 flex-wrap justify-center">
-    {avatars.map((item, index) => (
-      <Image
+  <div className="mt-5 grid grid-cols-4 gap-4">
+    {avatars.map((avatar, index) => (
+      <button
         key={index}
-        src={item}
-        alt={`Avatar ${index + 1}`}
-        width={48}
-        height={48}        unoptimized        onClick={() => setAvatar(item)}
-        className={`rounded-full cursor-pointer transition hover:scale-110 ${
-          avatar === item
-            ? "ring-2 ring-green-500"
+        type="button"
+        onClick={() => {
+          setSelectedAvatar(avatar);
+          setPreviewImage("");
+          setProfileImage(null);
+        }}
+        className={`overflow-hidden rounded-full transition duration-300 hover:scale-110 ${
+          selectedAvatar === avatar
+            ? "ring-4 ring-green-500"
             : ""
         }`}
-      />
+      >
+        <Image
+          src={avatar}
+          alt={`Avatar ${index + 1}`}
+          width={60}
+          height={60}
+          className="rounded-full object-cover"
+        />
+      </button>
     ))}
   </div>
 </div>
-  {/* Username */}
+{/* <div className="relative">
+  <FaUser
+    className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+      isDark ? "text-gray-400" : "text-gray-500"
+    }`}
+  />
+
+  <input
+    type="text"
+    placeholder="Username"
+    value={username}
+    onChange={(e) => setUsername(e.target.value)}
+    className={`w-full pl-10 pr-3 py-3 border rounded-lg text-lg transition-colors duration-200
+      ${
+        isDark
+          ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+          : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
+      }
+      focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
+  />
+</div> */}
+
+<div>
+  <label className={labelClass}>
+    Username
+  </label>
+
   <div className="relative">
     <FaUser
-      className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-        theme === "dark"
-          ? "text-gray-400"
-          : "text-gray-500"
-      }`}
+      className={`absolute left-4 top-1/2 -translate-y-1/2 ${iconClass}`}
     />
 
     <input
       type="text"
-      name="username"
-      value={data.username}
-      onChange={handleChange}
       placeholder="Enter username"
-      className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 ${
-        theme === "dark"
-          ? "bg-gray-700 border-gray-600 text-white"
-          : "bg-white border-gray-300"
-      }`}
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+      className={`${inputClass} pl-11`}
     />
   </div>
-
-           <div>
-    <label className="block text-sm font-medium mb-2">
-      About
-    </label>
-
-    <textarea
-      name="about"
-      value={data.about}
-      onChange={handleChange}
-      placeholder="Tell people a bit about yourself"
-      className={`w-full rounded-xl border px-4 py-3 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-green-500 ${
-        theme === "dark"
-          ? "bg-gray-700 border-gray-600 text-white"
-          : "bg-white border-gray-300"
-      }`}
-    />
-  </div>
-
-       
-
-          {/* Agreement */}
-  <label className="flex items-center gap-2 text-sm cursor-pointer">
-    <input
-      type="checkbox"
-      checked={data.agreed}
-      onChange={handleCheckboxChange}
-      className="h-4 w-4"
-    />
-
-    I agree to update my profile information.
+</div>
+{/* <div>
+  <label
+    className={`mb-2 block text-sm font-medium ${
+      isDark ? "text-gray-300" : "text-gray-700"
+    }`}
+  >
+    About
   </label>
 
-  {/* Submit Button */}
-  <button
-    type="submit"
-    disabled={
-      profileStatus === Status.LOADING ||
-      !data.username.trim() ||
-      !data.agreed
-    }
-    className="w-full rounded-xl bg-green-500 px-4 py-3 text-white font-medium transition hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+  <div className="relative">
+    <FaInfoCircle
+      className={`absolute left-3 top-4 ${
+        isDark ? "text-gray-400" : "text-gray-500"
+      }`}
+    />
+
+    <textarea
+      value={about}
+      onChange={(e) => setAbout(e.target.value)}
+      placeholder="Tell people something about yourself..."
+      rows={4}
+      className={`w-full rounded-lg border pl-10 pr-3 py-3 text-base transition-colors duration-200 resize-none
+        ${
+          isDark
+            ? "bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+            : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
+        }
+        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
+    />
+  </div>
+
+  <p
+    className={`mt-2 text-xs ${
+      isDark ? "text-gray-400" : "text-gray-500"
+    }`}
   >
-    {profileStatus === Status.LOADING
-      ? "Saving..."
-      : "Save Profile"}
-  </button>
+    {about.length}/150 characters
+  </p>
+</div> */}
+
+<div>
+  <label className={labelClass}>
+    About
+  </label>
+
+  <div className="relative">
+    <FaInfoCircle
+      className={`absolute left-4 top-4 ${iconClass}`}
+    />
+
+    <textarea
+      rows={4}
+      maxLength={150}
+      value={about}
+      onChange={(e) => setAbout(e.target.value)}
+      placeholder="Tell people something about yourself..."
+      className={`${inputClass} resize-none pl-11`}
+    />
+  </div>
+
+  <p
+    className={`mt-2 text-right text-xs ${
+      isDark ? "text-gray-400" : "text-gray-500"
+    }`}
+  >
+    {about.length}/150
+  </p>
+</div>
+     {/* <div className="flex items-center space-x-2">
+  <input
+    id="terms"
+    type="checkbox"
+    checked={agreed}
+    onChange={(e) => setAgreed(e.target.checked)}
+    className={`h-4 w-4 rounded border-gray-300 text-green-500 focus:ring-2 focus:ring-green-500 ${
+      isDark
+        ? "bg-gray-700 border-gray-600"
+        : "bg-white border-gray-300"
+    }`}
+  />
+
+  <label
+    htmlFor="terms"
+    className={`text-sm ${
+      isDark ? "text-gray-300" : "text-gray-700"
+    }`}
+  >
+    I agree to the{" "}
+    <a
+      href="#"
+      className="font-medium text-green-500 hover:underline"
+    >
+      Terms and Conditions
+    </a>
+  </label>
+</div> */}
+<div className="flex items-center gap-3">
+  <input
+    id="terms"
+    type="checkbox"
+    checked={agreed}
+    onChange={(e) => setAgreed(e.target.checked)}
+    className="h-5 w-5 rounded text-green-500 focus:ring-green-500"
+  />
+
+  <label
+    htmlFor="terms"
+    className={`text-sm ${
+      isDark ? "text-gray-300" : "text-gray-700"
+    }`}
+  >
+    I agree to the{" "}
+    <button
+      type="button"
+      className="font-semibold text-green-500 hover:underline"
+    >
+      Terms & Conditions
+    </button>
+  </label>
+</div>
+
+     {/* <button
+  type="submit"
+  disabled={profileStatus === Status.LOADING}
+  className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-lg flex justify-center items-center"
+>
+  {profileStatus === Status.LOADING ? <Spinner /> : "Save Profile"}
+</button> */}
+
+<button
+  type="submit"
+  disabled={
+    profileStatus === Status.LOADING ||
+    !username.trim() ||
+    !agreed
+  }
+  className="flex w-full items-center justify-center rounded-xl bg-green-500 py-3 font-semibold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+>
+  {profileStatus === Status.LOADING ? (
+    <Spinner />
+  ) : (
+    "Save Profile"
+  )}
+</button>
+
         </form>
       </motion.div>
     </div>
   );
+
+
+
 };
 
 export default UpdateProfile;

@@ -14,6 +14,10 @@ import { IConversation } from "../lib/store/chat/chat-slice-types";
 import MessageBubble from "./message-bubble";
 import { deleteMessageThunk } from "../lib/store/chat/chat-slice";
 import EmojiPicker, { Theme } from "emoji-picker-react";
+import { FiSend } from "react-icons/fi";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+
+
 
 interface ChatWindowProps {
   selectedUser: string | null;
@@ -37,6 +41,7 @@ const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 const [showFileMenu, setShowFileMenu] = useState(false);
 const [filePreview, setFilePreview] = useState<string | null>(null);
 const [selectedFile, setSelectedFile] = useState<File | null>(null);
+const [isSending, setIsSending] = useState(false);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 const messageEndRef = useRef<HTMLDivElement>(null);
 const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,6 +190,7 @@ setFilePreview(previewUrl);
   e.target.value = "";
 };
 const handleSendMessage = async () => {
+  setIsSending(true);
   if (!chatSelectedUser) return;
 
   if (!message.trim() && !selectedFile) return;
@@ -203,12 +209,15 @@ const handleSendMessage = async () => {
     setSelectedFile(null);
     setFilePreview(null);
 
-    stopTyping(
-      selectedConversation!._id,
-      chatSelectedUser._id
-    );
+   if (selectedConversation && chatSelectedUser) {
+  stopTyping(
+    selectedConversation._id,
+    chatSelectedUser._id
+  );
+}
   } catch (error) {
     console.error(error);
+     setIsSending(false);
   }
 };
 
@@ -416,29 +425,46 @@ return (
 ))}
 <div ref={messageEndRef}/>
 </div>
-{
-  filePreview && (
-    <div className="relative p-2 flex justify-center border-b border-gray-200 dark:border-gray-700">
-      <Image
-        src={filePreview}
-        alt="file-preview"
-        width={320}
-        height={320}
-        className="max-h-60 w-auto object-contain rounded-lg shadow-lg"
-      />
+{filePreview && (
+  <div className="relative p-2 flex justify-center border-b border-gray-200 dark:border-gray-700">
+    <div className="relative">
+      {selectedFile?.type.startsWith("video/") ? (
+        <video
+          src={filePreview}
+          controls
+          className="max-h-[320px] max-w-full object-contain rounded-lg"
+        />
+      ) : (
+        <Image
+          src={filePreview}
+          alt="file-preview"
+          width={320}
+          height={320}
+          className="max-h-60 w-auto object-contain rounded-lg shadow-lg"
+        />
+      )}
 
-      <button
-        onClick={() => {
-          setFilePreview(null);
-          setSelectedFile(null);
-        }}
-        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md"
-      >
-        <FaTimes className="h-4 w-4" />
-      </button>
+      {/* Loader */}
+      {isSending && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40">
+          <div className="h-10 w-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
     </div>
-  )
-}
+
+    <button
+      onClick={() => {
+        if (filePreview) URL.revokeObjectURL(filePreview);
+        setFilePreview(null);
+        setSelectedFile(null);
+      }}
+      disabled={isSending}
+      className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md disabled:opacity-50"
+    >
+      <FaTimes className="h-4 w-4" />
+    </button>
+  </div>
+)}
 
       {/* Message Input */}
       <div className={`p-4 ${theme === 'dark' ? "bg-[#303430]" : "bg-white" } flex items-center space-x-2 relative`}>

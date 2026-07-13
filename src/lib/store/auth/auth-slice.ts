@@ -59,29 +59,29 @@ export default authSlice.reducer;
 
 export const { setUser, setLoginStatus, setOtpStatus, setProfileStatus, setUsers ,setUsersStatus } = authSlice.actions;
 
-export function loginUser(data: SendOtpPayload) {
-  return async function loginUserThunk(dispatch: AppDispatch) {
-    try {
-      dispatch(setLoginStatus(Status.LOADING));
+// export function loginUser(data: SendOtpPayload) {
+//   return async function loginUserThunk(dispatch: AppDispatch) {
+//     try {
+//       dispatch(setLoginStatus(Status.LOADING));
 
-      const response = await api.post("/auth/send-otp", data);
+//       const response = await api.post("/auth/send-otp", data);
 
-      dispatch(setLoginStatus(Status.SUCCESS));
+//       dispatch(setLoginStatus(Status.SUCCESS));
 
-      return response.data;
-    } catch (error: any) {
-  console.log("ERROR:", error);
-  console.log("RESPONSE:", error?.response);
-  console.log("DATA:", error?.response?.data);
+//       return response.data;
+//     } catch (error: any) {
+//   console.log("ERROR:", error);
+//   console.log("RESPONSE:", error?.response);
+//   console.log("DATA:", error?.response?.data);
 
-  toast.error(
-    error?.response?.data?.message ||
-    error?.message ||
-    "Failed to send OTP"
-  );
-}
-  };
-}
+//   toast.error(
+//     error?.response?.data?.message ||
+//     error?.message ||
+//     "Failed to send OTP"
+//   );
+// }
+//   };
+// }
 export function verifyOtp(data: VerifyOtpPayload) {
   return async function verifyOtpThunk(dispatch: AppDispatch) {
     try {
@@ -110,6 +110,27 @@ export function verifyOtp(data: VerifyOtpPayload) {
     }
   };
 }
+export function fetchMe() {
+  return async function fetchMeThunk(dispatch: AppDispatch) {
+    try {
+      dispatch(setProfileStatus(Status.LOADING));
+
+      const response = await api.get("/auth/me");
+
+      dispatch(setUser(response.data.user));
+      dispatch(setProfileStatus(Status.SUCCESS));
+
+      return response.data;
+    } catch (error: any) {
+      dispatch(setProfileStatus(Status.ERROR));
+
+      throw new Error(
+        error?.response?.data?.message ||
+          "Failed to fetch user"
+      );
+    }
+  };
+}
 export function updateProfile(formData: FormData) {
   return async function updateProfileThunk(dispatch: AppDispatch) {
     try {
@@ -134,6 +155,43 @@ console.log(response.data.user);
     }
   };
 }
+
+
+// export function updateProfile(formData: FormData) {
+//   return async function updateProfileThunk(dispatch: AppDispatch) {
+//     try {
+//       dispatch(setProfileStatus(Status.LOADING));
+
+//       const response = await api.patch(
+//         "/auth/update-profile",
+//         formData,
+//         {
+//           headers: {
+//             "Content-Type": "multipart/form-data",
+//           },
+//         }
+//       );
+
+//       dispatch(setUser(response.data.user));
+//       dispatch(setProfileStatus(Status.SUCCESS));
+
+//       toast.success(response.data.message || "Profile updated successfully");
+
+//       return response.data;
+//     } catch (error: any) {
+//       dispatch(setProfileStatus(Status.ERROR));
+
+//       const message =
+//         error?.response?.data?.message || "Failed to update profile";
+
+//       toast.error(message);
+
+//       console.error("PROFILE ERROR:", error?.response?.data || error);
+
+//       throw error;
+//     }
+//   };
+// }
 export function resendOtp(email:string){
   return async function resendOtpThunk(dispatch :AppDispatch){
    try {
@@ -210,6 +268,24 @@ export function getAllUsers() {
       return response.data;
     } catch (error: any) {
       dispatch(setUsersStatus(Status.ERROR));
+      throw error;
+    }
+  };
+}
+export function loginUser(data: SendOtpPayload) {
+  return async function loginUserThunk(dispatch: AppDispatch) {
+    console.log("DATA SENT TO API:", data);
+
+    try {
+      dispatch(setLoginStatus(Status.LOADING));
+
+       const response = await api.post("/auth/send-otp", data);
+
+      dispatch(setLoginStatus(Status.SUCCESS));
+
+      return response.data;
+    } catch (error) {
+         dispatch(setUsersStatus(Status.ERROR));
       throw error;
     }
   };

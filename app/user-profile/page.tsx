@@ -1,3 +1,12 @@
+import UserDetails from "@/src/components/user-details";
+
+
 export default function UserProfilePage() {
-  return <div>User profile page</div>;
+  return(
+
+    <>
+    <UserDetails/>
+    
+    </>
+  );
 }

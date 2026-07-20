@@ -10,6 +10,7 @@ import {
   setError,updateUserStatus,
   updateReaction,
 } from "../store/chat/chat-slice";
+import { acceptCall, clearVideoCall, closeCallModal, openCallModal, setCallStatus, setIncomingCall } from "../store/video/video-slice";
 
 
 export const registerSocketListeners = ( 
@@ -130,6 +131,45 @@ socket.on("reaction_updated", (message) => {
     }
 );
 
+// Incoming call
+socket.on("incoming_call", (data) => {
+  dispatch(setIncomingCall(data));
+  dispatch(setCallStatus("incoming"));
+  dispatch(openCallModal());
+});
+
+// Call accepted
+socket.on("call_accepted", (data) => {
+  dispatch(acceptCall(data));
+  dispatch(setCallStatus("connecting"));
+});
+
+// Call rejected
+socket.on("call_rejected", () => {
+  dispatch(setCallStatus("rejected"));
+  dispatch(closeCallModal());
+  dispatch(clearVideoCall());
+});
+
+// Call failed (user offline, receiver unavailable, etc.)
+socket.on("call_failed", ({ reason }) => {
+  console.log("Call failed:", reason);
+
+  dispatch(setError(reason));
+  dispatch(setCallStatus("failed"));
+
+  setTimeout(() => {
+    dispatch(closeCallModal());
+    dispatch(clearVideoCall());
+  }, 2000);
+});
+
+// Call ended
+socket.on("call_ended", () => {
+  dispatch(setCallStatus("ended"));
+  dispatch(closeCallModal());
+  dispatch(clearVideoCall());
+});
   /**
    * ==========================
    * Errors

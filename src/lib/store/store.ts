@@ -3,12 +3,14 @@ import authSlice from './auth/auth-slice'
 import themeSlice from './themestore/theme-slice'
 import uiSlice from './layout/ui-slice'
 import chatSlice from "./chat/chat-slice";
+import videoSlice from './video/video-slice'
 const store = configureStore({
     reducer:{
 auth : authSlice,
 theme :themeSlice,
 layout : uiSlice,
-chat:chatSlice
+chat:chatSlice,
+video : videoSlice
     }
 })
 export default store

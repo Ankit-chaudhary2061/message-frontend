@@ -16,6 +16,9 @@ import { deleteMessageThunk } from "../lib/store/chat/chat-slice";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { FiSend } from "react-icons/fi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import VideoCallManager from "./video-call-manager";
+import { socket } from "../lib/socket/socket";
+import { initiateCall } from "../lib/store/video/video-slice";
 
 
 
@@ -220,7 +223,20 @@ const handleSendMessage = async () => {
      setIsSending(false);
   }
 };
-
+const handleVideoCall = () => {
+  if (chatSelectedUser && online) {
+    dispatch(
+      initiateCall(
+        chatSelectedUser._id,
+        chatSelectedUser.username ?? "Unknown user",
+        chatSelectedUser.profileImage?.url ?? "",
+        "video"
+      )
+    );
+  } else {
+    alert("User is offline");
+  }
+};
 
 const renderDateSeparator = (date: string) => {
   const messageDate = new Date(date);
@@ -393,8 +409,8 @@ return (
             <FaVideo className="h-5 w-5" />
           </button>
 
-          <button className="hover:text-green-500 transition">
-            <FaEllipsisV className="h-5 w-5" />
+          <button className="hover:text-green-500 transition" onClick={handleVideoCall}>
+            <FaEllipsisV className="h-5 w-5 text-green-500 hover:text-green-600" />
           </button>
         </div>
       </div>
@@ -557,6 +573,9 @@ className="focus:outline-none"
 </button>
       </div>
     </div>
+
+<VideoCallManager socket={socket}/>
+
   </>
 );
 };

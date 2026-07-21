@@ -326,7 +326,25 @@ export const endCurrentCall =
       callId,
     });
   };
+export const processQueuedIceCandidates =
+  () =>
+  async (dispatch: AppDispatch, getState: () => RootState) => {
+    const { peerConnection, iceCandidatesQueue } = getState().video;
 
+    if (!peerConnection) return;
+
+    for (const candidate of iceCandidatesQueue) {
+      try {
+        await peerConnection.addIceCandidate(
+          new RTCIceCandidate(candidate)
+        );
+      } catch (error) {
+        console.error("Error adding queued ICE candidate:", error);
+      }
+    }
+
+    dispatch(clearIceCandidates());
+  };
 
   export const getLocalMedia =
   (callType: "audio" | "video") =>
